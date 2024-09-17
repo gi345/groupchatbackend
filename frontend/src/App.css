@@ -1,0 +1,61 @@
+:root {
+    --light-bg-color: #ffffff;
+    --dark-bg-color: #1a1a1a;
+    --text-color-light: #000000;
+    --text-color-dark: #ffffff;
+  }
+  
+  /* Default to dark theme */
+  body.dark {
+    background-color: var(--dark-bg-color);
+    color: var(--text-color-dark);
+  }
+  
+  /* Light theme for specific conditions */
+  body.light {
+    background-color: var(--light-bg-color);
+    color: var(--text-color-light);
+  }
+  
+  /* Responsive styles */
+  .group-container, .plans-container, .otp-container {
+    width: 100%;
+    padding: 20px;
+    box-sizing: border-box;
+  }
+  
+  .plan-card {
+    width: 250px;
+    padding: 15px;
+    border: 1px solid #ccc;
+    margin: 10px;
+  }
+  
+  @media (max-width: 768px) {
+    .group-container, .plans-container, .otp-container {
+      padding: 10px;
+    }
+  
+    .plan-card {
+      width: 100%;
+    }
+  }
+  /* Global Styles for the App */
+
+.app-container {
+    padding: 20px;
+    font-family: Arial, sans-serif;
+    transition: background-color 0.3s, color 0.3s;
+  }
+  
+  .app-container.light {
+    background-color: #ffffff;
+    color: #000000;
+  }
+  
+  .app-container.dark {
+    background-color: #333333;
+    color: #ffffff;
+  }
+  
+        
