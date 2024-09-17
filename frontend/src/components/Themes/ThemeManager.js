@@ -1,29 +1,59 @@
-import { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 
-// Simulate getting user location (for frontend demo purposes)
+// Function to get user's location (using Geolocation API)
 export const getUserLocation = () => {
-  return "Meerut"; // Change this to simulate different locations
-};
-
-// Check if the location is one of the southern states
-export const isInSouthernStates = (location) => {
-  const southernStates = ["Tamil Nadu", "Kerala", "Karnataka", "Andhra", "Telangana"];
-  return southernStates.includes(location);
-};
-
-const ThemeManager = ({ setTheme }) => {
-  useEffect(() => {
-    const currentTime = new Date().getHours();
-    const userLocation = getUserLocation(); // Assume a function to get location (simulate for frontend)
-    
-    if ((currentTime >= 10 && currentTime <= 12) && isInSouthernStates(userLocation)) {
-      setTheme('light');
+  return new Promise((resolve, reject) => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          resolve({
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+          });
+        },
+        (error) => reject(error)
+      );
     } else {
-      setTheme('dark');
+      reject(new Error('Geolocation not supported by this browser.'));
     }
-  }, [setTheme]);
+  });
+};
 
-  return null; // No need to return JSX here for theme management
+// Function to check if user is in Southern states (you can change this logic)
+export const isInSouthernStates = (latitude) => {
+  const southernThreshold = 23.5; // Modify as per your requirement
+  return latitude < southernThreshold;
+};
+
+// Main ThemeManager component
+const ThemeManager = () => {
+  const [themes, setThemes] = useState([]);
+  const baseUrl = process.env.REACT_APP_API_BASE_URL;
+
+  useEffect(() => {
+    // Fetch themes from the backend API using Axios
+    axios
+      .get(`${baseUrl}/themes`)
+      .then((response) => {
+        setThemes(response.data);
+      })
+      .catch((error) => {
+        console.error('Error fetching themes:', error);
+      });
+  }, [baseUrl]);
+
+  return (
+    <div>
+      <h2>Available Themes</h2>
+      {themes.map((theme, index) => (
+        <div key={index}>
+          <h3>{theme.name}</h3>
+          <p>{theme.description}</p>
+        </div>
+      ))}
+    </div>
+  );
 };
 
 export default ThemeManager;

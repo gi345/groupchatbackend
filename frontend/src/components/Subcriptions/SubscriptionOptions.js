@@ -1,17 +1,28 @@
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+
+// Subscription Options Component
 const SubscriptionOptions = () => {
-  const plans = [
-    { name: 'Free', time: 5, price: 0 },
-    { name: 'Bronze', time: 7, price: 10 },
-    { name: 'Silver', time: 10, price: 50 },
-    { name: 'Gold', time: 'Unlimited', price: 100 },
-  ];
+  const [plans, setPlans] = useState([]);
+  const baseUrl = process.env.REACT_APP_API_BASE_URL;
+
+  useEffect(() => {
+    // Fetch subscription plans from the backend API using Axios
+    axios.get(`${baseUrl}/subscriptions`)
+      .then(response => {
+        // Set the plans in state
+        setPlans(response.data);
+      })
+      .catch(error => {
+        console.error('Error fetching subscription plans:', error);
+      });
+  }, [baseUrl]);
 
   return (
     <div className="plans-container">
       {plans.map((plan, index) => (
         <div key={index} className="plan-card">
           <h3>{plan.name}</h3>
-          {/* Conditionally handle the display of time */}
           <p>Watch time: {plan.time === 'Unlimited' ? plan.time : `${plan.time} mins`}</p>
           <p>Price: ₹{plan.price}</p>
           <button>Upgrade</button>
@@ -22,5 +33,3 @@ const SubscriptionOptions = () => {
 };
 
 export default SubscriptionOptions;
-
-  
