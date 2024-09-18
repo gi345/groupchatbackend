@@ -1,42 +1,63 @@
 import React, { useState, useEffect } from 'react';
-import { getUserLocation, isInSouthernStates } from '../Themes/ThemeManager';
 
 const OtpVerification = () => {
-  const [otp, setOtp] = useState('');
-  const [isVerified, setIsVerified] = useState(false);
-  const [userLocation, setUserLocation] = useState('');
+  const [location, setLocation] = useState(null);
+  const [error, setError] = useState(null);
 
-  useEffect(() => {
-    const location = getUserLocation();
-    setUserLocation(location);
-
-    if (isInSouthernStates(location)) {
-      console.log('User is in a southern state');
-    }
-  }, []);
-
-  const handleOtpSubmit = () => {
-    // Handle OTP verification logic here
-    if (otp === '1234') {
-      setIsVerified(true);
-      alert('OTP Verified Successfully!');
+  const fetchLocation = () => {
+    if ('geolocation' in navigator) {
+      // Request location
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setLocation({
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+          });
+          setError(null); // Clear any previous errors
+        },
+        (error) => {
+          // Handle errors here
+          if (error.code === 1) {
+            // User denied permission
+            setError('Location permission denied. Please allow access to continue.');
+          } else if (error.code === 2) {
+            // Position unavailable
+            setError('Location information is unavailable.');
+          } else if (error.code === 3) {
+            // Timeout
+            setError('The request to get your location timed out.');
+          } else {
+            // General error
+            setError('An unknown error occurred while fetching location.');
+          }
+        }
+      );
     } else {
-      alert('Incorrect OTP');
+      setError('Geolocation is not supported by this browser.');
     }
   };
 
+  useEffect(() => {
+    fetchLocation();
+  }, []);
+
   return (
     <div>
-      <h3>OTP Verification</h3>
-      <input
-        type="text"
-        placeholder="Enter OTP"
-        value={otp}
-        onChange={(e) => setOtp(e.target.value)}
-      />
-      <button onClick={handleOtpSubmit}>Submit OTP</button>
+      <h2>OTP Verification</h2>
+      {location ? (
+        <p>
+          User Location: Latitude: {location.latitude}, Longitude: {location.longitude}
+        </p>
+      ) : (
+        <p>Fetching your location...</p>
+      )}
 
-      {isVerified && <p>OTP Verified for user in {userLocation}!</p>} {/* Display user location */}
+      {error && <p style={{ color: 'red' }}>{error}</p>}
+
+      <form>
+        <input type="text" placeholder="Enter OTP" />
+        <button type="submit">Submit OTP</button>
+      </form>
     </div>
   );
 };
