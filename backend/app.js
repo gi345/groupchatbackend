@@ -1,34 +1,35 @@
+import 'dotenv/config';  // Automatically loads environment variables
 import express from 'express';
 import mongoose from 'mongoose';
 import bodyParser from 'body-parser';
 import cors from 'cors';  // Import CORS middleware
+
 import groupRoutes from './routes/groupRoutes.js';
 import subscriptionRoutes from './routes/subscriptionRoutes.js';
 import themeRoutes from './routes/themeRoutes.js';
-import dotenv from 'dotenv';
-
-// Load environment variables
-dotenv.config(); 
+import otpRoutes from './routes/otpRoutes.js';
+import authRoutes from './routes/authRoutes.js';
 
 const app = express();
 
-// CORS configuration
+// Allowed origins for CORS
 const allowedOrigins = [
   'https://nullclassintership.netlify.app',  // Your frontend deployment URL (Netlify)
   'http://localhost:3000'                    // Local development URL
 ];
 
-// Configure CORS to allow multiple origins
+// CORS configuration
 app.use(cors({
   origin: (origin, callback) => {
-    if (allowedOrigins.includes(origin) || !origin) { // Allow requests with no 'origin' header (mobile apps, etc.)
+    if (!origin || allowedOrigins.includes(origin)) {
+      // If origin is allowed or if it's a non-browser request (e.g., mobile apps)
       callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS'));
     }
   },
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],  // Allowed methods
-  credentials: true                           // Allow credentials if needed (cookies, authentication)
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],  // Allowed HTTP methods
+  credentials: true,  // Allow cookies and credentials (if necessary)
 }));
 
 // Middleware to parse incoming request bodies as JSON
@@ -43,6 +44,8 @@ app.get('/', (req, res) => {
 app.use('/api/groups', groupRoutes);
 app.use('/api/subscriptions', subscriptionRoutes);
 app.use('/api/themes', themeRoutes);
+app.use('/api/otp', otpRoutes);
+app.use('/api/auth', authRoutes);
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI, { 
@@ -52,8 +55,17 @@ mongoose.connect(process.env.MONGODB_URI, {
   .then(() => console.log('MongoDB connected successfully'))
   .catch(err => console.error('MongoDB connection error:', err));
 
-// Start the server on the port specified in environment variables or default to 5000
-const PORT = process.env.PORT || 3000;
+// Error handling for CORS issues
+app.use((err, req, res, next) => {
+  if (err instanceof Error && err.message === 'Not allowed by CORS') {
+    res.status(403).json({ message: 'CORS error: Access not allowed from this origin' });
+  } else {
+    next(err);  // Pass other errors to the default error handler
+  }
+});
+
+// Start the server on the specified port or default to 5000
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });

@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
 const OtpVerification = () => {
   const [location, setLocation] = useState(null);
+  const [otp, setOtp] = useState('');
   const [error, setError] = useState(null);
+  const [verificationMessage, setVerificationMessage] = useState('');
 
   const fetchLocation = () => {
     if ('geolocation' in navigator) {
@@ -37,6 +40,26 @@ const OtpVerification = () => {
     }
   };
 
+  const handleVerifyOTP = async (e) => {
+    e.preventDefault();
+    if (!location) {
+      setError('Location not available yet');
+      return;
+    }
+
+    try {
+      const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL}/otp/verify`, {
+        otp,
+        location, // Send the location along with OTP to the backend
+      });
+
+      setVerificationMessage(response.data.message || 'OTP verified successfully');
+    } catch (error) {
+      setError('Error verifying OTP. Please try again.');
+      console.error('Verification error:', error);
+    }
+  };
+
   useEffect(() => {
     fetchLocation();
   }, []);
@@ -54,8 +77,15 @@ const OtpVerification = () => {
 
       {error && <p style={{ color: 'red' }}>{error}</p>}
 
-      <form>
-        <input type="text" placeholder="Enter OTP" />
+      {verificationMessage && <p>{verificationMessage}</p>}
+
+      <form onSubmit={handleVerifyOTP}>
+        <input
+          type="text"
+          placeholder="Enter OTP"
+          value={otp}
+          onChange={(e) => setOtp(e.target.value)}
+        />
         <button type="submit">Submit OTP</button>
       </form>
     </div>
