@@ -4,9 +4,9 @@ import twilio from 'twilio';
 // Twilio configuration
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
 const authToken = process.env.TWILIO_AUTH_TOKEN;
-const twilioPhoneNumber = process.env.TWILIO_PHONE_NUMBER;
+const phoneNumber = process.env.TWILIO_PHONE_NUMBER;
 
-if (!accountSid || !authToken || !twilioPhoneNumber) {
+if (!accountSid || !authToken || !phoneNumber) {
   throw new Error('Twilio environment variables are missing.');
 }
 
